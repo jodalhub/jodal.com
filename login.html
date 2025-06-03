@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>로그인 - 조달닷컴</title>
+  <style>
+    body { text-align: center; padding: 100px; font-family: sans-serif; }
+    input { display: block; margin: 10px auto; padding: 10px; width: 250px; }
+    .btn { padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h1>🔐 로그인</h1>
+  <input type="email" id="email" placeholder="이메일" />
+  <input type="password" id="password" placeholder="비밀번호" />
+  <button class="btn" onclick="login()">로그인</button>
+  <p><a href="find.html">아이디/비밀번호 찾기</a></p>
+
+  <script>
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const storedUser = localStorage.getItem(email);
+
+      if (!storedUser) {
+        alert('가입된 사용자가 없습니다.');
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+
+      if (user.password !== password) {
+        alert('비밀번호가 틀렸습니다.');
+        return;
+      }
+
+      if (!user.approved) {
+        alert('관리자 승인 대기 중입니다.');
+        return;
+      }
+
+      // 로그인 성공 → 다음 페이지로 이동
+      alert(`환영합니다, ${user.name}님!`);
+      window.location.href = "bids.html"; // 입찰공고 페이지
+    }
+  </script>
+</body>
+</html>

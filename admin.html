@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>관리자 페이지 - 조달닷컴</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f0f0f0; }
+    button { padding: 6px 12px; }
+  </style>
+</head>
+<body>
+  <h1>🔧 관리자 승인 페이지</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>이메일</th>
+        <th>승인 상태</th>
+        <th>승인 조치</th>
+      </tr>
+    </thead>
+    <tbody id="userTable"></tbody>
+  </table>
+
+  <script>
+    function loadUsers() {
+      const tbody = document.getElementById('userTable');
+      tbody.innerHTML = ''; // 초기화
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key.includes('@')) continue; // 이메일 형식만 사용자로 인정
+
+        const user = JSON.parse(localStorage.getItem(key));
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td>${user.name}</td>
+          <td>${user.email || key}</td>
+          <td>${user.approved ? '✅ 승인됨' : '⏳ 대기중'}</td>
+          <td>
+            ${user.approved ? '-' : `<button onclick="approve('${key}')">승인</button>`}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    function approve(email) {
+      const user = JSON.parse(localStorage.getItem(email));
+      user.approved = true;
+      localStorage.setItem(email, JSON.stringify(user));
+      alert(`${user.name} 님이 승인되었습니다.`);
+      loadUsers(); // 목록 다시 불러오기
+    }
+
+    window.onload = loadUsers;
+  </script>
+</body>
+</html>

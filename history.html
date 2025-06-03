@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>투찰기록 보기 - 조달닷컴</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 40px; max-width: 1200px; margin: auto; }
+    h1 { font-size: 26px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th { background-color: #f0f0f0; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .controls input, .controls select {
+      padding: 8px;
+      font-size: 14px;
+    }
+    .btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-danger { background-color: #dc3545; color: white; }
+    .btn-danger:hover { background-color: #c82333; }
+    .btn-download { background-color: #28a745; color: white; }
+    .btn-download:hover { background-color: #218838; }
+  </style>
+</head>
+<body>
+  <h1>📊 투찰 기록 보기</h1>
+
+  <div class="controls">
+    <label>상태:
+      <select id="filterStatus" onchange="renderTable()">
+        <option value="전체">전체</option>
+        <option value="계산만 함">계산만 함</option>
+        <option value="투찰완료">투찰완료</option>
+      </select>
+    </label>
+
+    <label>공고명 검색:
+      <input type="text" id="searchTitle" oninput="renderTable()" placeholder="예: 사무기기">
+    </label>
+
+    <label>계산일자:
+      <input type="date" id="searchDate" onchange="renderTable()">
+    </label>
+
+    <button class="btn btn-download" onclick="downloadExcel()">엑셀 다운로드</button>
+    <button class="btn btn-danger" onclick="clearHistory()">기록 전체 삭제</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>공고명</th>
+        <th>기초금액</th>
+        <th>낙찰하한율</th>
+        <th>사정율</th>
+        <th>투찰가</th>
+        <th>상태</th>
+        <th>계산일시</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+
+  <script>
+    let allHistory = JSON.parse(localStorage.getItem('bidHistory') || '[]').reverse();
+
+    function renderTable() {
+      const tbody = document.getElementById('historyBody');
+      tbody.innerHTML = '';
+
+      const statusFilter = document.getElementById('filterStatus').value;
+      const titleSearch = document.getElementById('searchTitle').value.trim().toLowerCase();
+      const dateSearch = document.getElementById('searchDate').value;
+
+      const filtered = allHistory.filter(r => {
+        const matchStatus = statusFilter === '전체' || r.상태 === statusFilter;
+        const matchTitle = r.공고명 && r.공고명.toLowerCase().includes(titleSearch);
+        const matchDate = !dateSearch || (r.계산일시 && r.계산일시.startsWith(dateSearch));
+        return matchStatus && matchTitle && matchDate;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7">해당 조건에 맞는 기록이 없습니다.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(r => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${r.공고명}</td>
+          <td>${Number(r.기초금액).toLocaleString()} 원</td>
+          <td>${r.낙찰하한율}%</td>
+          <td>${r.사정율}%</td>
+          <td>${Number(r.투찰가).toLocaleString()} 원</td>
+          <td>${r.상태}</td>
+          <td>${r.계산일시}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function clearHistory() {
+      if (confirm("정말 모든 기록을 삭제하시겠습니까?")) {
+        localStorage.removeItem('bidHistory');
+        location.reload();
+      }
+    }
+
+    function downloadExcel() {
+      const filter = document.getElementById('filterStatus').value;
+      const title = document.getElementById('searchTitle').value.trim().toLowerCase();
+      const date = document.getElementById('searchDate').value;
+
+      const filtered = allHistory.filter(r => {
+        const matchStatus = filter === '전체' || r.상태 === filter;
+        const matchTitle = r.공고명 && r.공고명.toLowerCase().includes(title);
+        const matchDate = !date || (r.계산일시 && r.계산일시.startsWith(date));
+        return matchStatus && matchTitle && matchDate;
+      });
+
+      if (filtered.length === 0) {
+        alert("다운로드할 데이터가 없습니다.");
+        return;
+      }
+
+      const data = filtered.map(r => ({
+        공고명: r.공고명,
+        기초금액: r.기초금액,
+        낙찰하한율: r.낙찰하한율,
+        사정율: r.사정율,
+        투찰가: r.투찰가,
+        상태: r.상태,
+        계산일시: r.계산일시
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "투찰기록");
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `bid_history_${dateStr}.xlsx`);
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>

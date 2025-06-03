@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>회원가입 - 조달닷컴</title>
+  <style>
+    body { text-align: center; padding: 100px; font-family: sans-serif; }
+    input { display: block; margin: 10px auto; padding: 10px; width: 250px; }
+    .btn { padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h1>📝 회원가입</h1>
+  <input type="text" id="name" placeholder="이름" />
+  <input type="email" id="email" placeholder="이메일" />
+  <input type="password" id="password" placeholder="비밀번호" />
+  <button class="btn" onclick="register()">회원가입</button>
+
+  <script>
+    function register() {
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!name || !email || !password) {
+        alert('모든 항목을 입력해주세요.');
+        return;
+      }
+
+      const user = {
+        name,
+        email,
+        password,
+        approved: false // 관리자 승인 전
+      };
+
+      // 로컬스토리지에 저장
+      localStorage.setItem(email, JSON.stringify(user));
+      alert('회원가입 완료! 관리자 승인 후 이용할 수 있습니다.');
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>

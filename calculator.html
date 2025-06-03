@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>입찰가 계산기 - 조달닷컴</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; max-width: 600px; margin: auto; }
+    h1 { font-size: 24px; margin-bottom: 20px; }
+    label { display: block; margin-top: 15px; margin-bottom: 5px; }
+    input { padding: 10px; width: 100%; font-size: 16px; }
+    .btn { padding: 10px 20px; font-size: 16px; margin-top: 20px; margin-right: 10px; }
+    .result { margin-top: 20px; font-weight: bold; font-size: 20px; }
+    .hint { color: #555; font-size: 14px; margin-top: 4px; }
+    .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🧮 입찰가 계산기</h1>
+
+  <label>공고명</label>
+  <input type="text" id="title" readonly />
+
+  <label>기초금액 (원)</label>
+  <input type="number" id="baseAmount" readonly />
+
+  <label>낙찰하한율 (%)</label>
+  <input type="number" id="minRate" readonly />
+
+  <label>예비가격 범위 (±%)</label>
+  <input type="number" id="range" placeholder="예: 3" />
+
+  <label>사정율 (%)</label>
+  <input type="number" id="customRate" placeholder="예: 100.5" />
+
+  <div class="hint" id="rangeHint"></div>
+
+  <div class="btn-group">
+    <button class="btn" onclick="calculate()">계산하기</button>
+    <button class="btn" onclick="submitBid()">투찰완료</button>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    const title = sessionStorage.getItem('title') || '(공고명 없음)';
+    const baseAmount = Number(sessionStorage.getItem('baseAmount')) || 100000000;
+    const minRate = Number(sessionStorage.getItem('rate')) || 88;
+    const bidId = sessionStorage.getItem('bidId') || Date.now();
+
+    document.getElementById('title').value = title;
+    document.getElementById('baseAmount').value = baseAmount;
+    document.getElementById('minRate').value = minRate;
+
+    document.getElementById('range').addEventListener('input', function () {
+      const range = Number(this.value);
+      if (range > 0 && minRate > 0) {
+        const low = (100 - range).toFixed(1);
+        const high = (100 + range).toFixed(1);
+        document.getElementById('rangeHint').innerText =
+          `💡 추천 사정율: ${low}% ~ ${high}% 범위에서 작성하세요.`;
+      } else {
+        document.getElementById('rangeHint').innerText = '';
+      }
+    });
+
+    function calculate() {
+      const customRate = Number(document.getElementById('customRate').value);
+
+      if (!customRate || customRate <= 0) {
+        alert("사정율(%)을 정확히 입력해주세요.");
+        return;
+      }
+
+      const totalRate = (minRate / 100) * (customRate / 100);
+      const bidAmount = Math.floor(baseAmount * totalRate);
+      const formatted = bidAmount.toLocaleString() + ' 원';
+
+      document.getElementById('result').innerText = `✅ 투찰가: ${formatted}`;
+
+      const record = {
+        bidId,
+        공고명: title,
+        기초금액: baseAmount,
+        낙찰하한율: minRate,
+        사정율: customRate,
+        투찰가: bidAmount,
+        계산일시: new Date().toLocaleString('ko-KR'),
+        상태: "계산만 함"
+      };
+
+      const history = JSON.parse(localStorage.getItem('bidHistory') || '[]');
+      history.push(record);
+      localStorage.setItem('bidHistory', JSON.stringify(history));
+    }
+
+    function submitBid() {
+      const customRate = Number(document.getElementById('customRate').value);
+
+      if (!customRate || customRate <= 0) {
+        alert("사정율(%)을 입력 후 투찰완료해주세요.");
+        return;
+      }
+
+      // bidHistory 업데이트
+      let history = JSON.parse(localStorage.getItem('bidHistory') || '[]');
+      history = history.map(r => {
+        if (r.bidId === bidId) {
+          return { ...r, 상태: "투찰완료", 투찰완료시각: new Date().toLocaleString('ko-KR') };
+        }
+        return r;
+      });
+      localStorage.setItem('bidHistory', JSON.stringify(history));
+
+      // submittedTitles에 현재 공고명 추가 (체크표시용)
+      const submittedTitles = JSON.parse(localStorage.getItem("submittedTitles") || "[]");
+      if (!submittedTitles.includes(title)) {
+        submittedTitles.push(title);
+        localStorage.setItem("submittedTitles", JSON.stringify(submittedTitles));
+      }
+
+      alert("투찰 완료되었습니다. 메인화면으로 이동합니다.");
+      window.location.href = 'bids.html';
+    }
+  </script>
+</body>
+</html>
