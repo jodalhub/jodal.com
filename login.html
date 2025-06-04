@@ -10,22 +10,27 @@
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f8f9fa;
+      background-color: #f9fafb;
     }
     .hero {
-      background: linear-gradient(to right, #007bff, #0056b3);
+      background: linear-gradient(135deg, #005bea, #00c6fb);
       color: white;
-      padding: 60px 20px 40px 20px;
+      padding: 80px 20px 50px 20px;
       text-align: center;
     }
     .hero .subtitle {
       font-size: 1rem;
-      opacity: 0.8;
+      opacity: 0.85;
       margin-bottom: 0.5rem;
     }
     .hero .title {
-      font-size: 2.5rem;
-      font-weight: 700;
+      font-size: 3.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    .card {
+      border: none;
+      border-radius: 14px;
     }
   </style>
 </head>
@@ -36,7 +41,7 @@
   </div>
 
   <div class="container mt-4">
-    <div class="card mx-auto shadow-sm" style="max-width: 400px;">
+    <div class="card shadow-sm mx-auto" style="max-width: 400px;">
       <div class="card-body">
         <form id="loginForm">
           <div class="mb-3 text-start">
@@ -49,7 +54,7 @@
           </div>
           <button type="submit" class="btn btn-primary w-100">로그인</button>
         </form>
-        <div class="mt-3 text-center">
+        <div class="mt-3 text-center small">
           <a href="register.html" class="me-3">회원가입</a>
           <a href="#">아이디·비밀번호 찾기</a>
         </div>
