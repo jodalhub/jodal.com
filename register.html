@@ -1,44 +1,57 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>회원가입 - 조달닷컴</title>
-  <style>
-    body { text-align: center; padding: 100px; font-family: sans-serif; }
-    input { display: block; margin: 10px auto; padding: 10px; width: 250px; }
-    .btn { padding: 10px 20px; }
-  </style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-  <h1>📝 회원가입</h1>
-  <input type="text" id="name" placeholder="이름" />
-  <input type="email" id="email" placeholder="이메일" />
-  <input type="password" id="password" placeholder="비밀번호" />
-  <button class="btn" onclick="register()">회원가입</button>
+<body class="bg-light">
+  <div class="container text-center mt-5">
+    <h2 class="mb-4 fw-bold text-primary">조달닷컴 회원가입</h2>
+
+    <div class="card mx-auto" style="max-width: 400px;">
+      <div class="card-body">
+        <form id="signupForm">
+          <div class="mb-3 text-start">
+            <label for="username" class="form-label">아이디 (이메일)</label>
+            <input type="email" id="username" class="form-control" required />
+          </div>
+          <div class="mb-3 text-start">
+            <label for="password" class="form-label">비밀번호</label>
+            <input type="password" id="password" class="form-control" required />
+          </div>
+          <div class="mb-3 text-start">
+            <label for="email" class="form-label">이메일</label>
+            <input type="email" id="email" class="form-control" required />
+          </div>
+          <button type="submit" class="btn btn-success w-100">회원가입</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script>
-    function register() {
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      if (!name || !email || !password) {
-        alert('모든 항목을 입력해주세요.');
-        return;
-      }
+    document.getElementById("signupForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const email = document.getElementById("email").value;
 
       const user = {
-        name,
-        email,
+        username,
         password,
-        approved: false // 관리자 승인 전
+        email,
+        isApproved: false
       };
 
-      // 로컬스토리지에 저장
-      localStorage.setItem(email, JSON.stringify(user));
-      alert('회원가입 완료! 관리자 승인 후 이용할 수 있습니다.');
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+      users.push(user);
+      localStorage.setItem("users", JSON.stringify(users));
+      alert("회원가입이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.");
       window.location.href = "login.html";
-    }
+    });
   </script>
 </body>
+</html>
