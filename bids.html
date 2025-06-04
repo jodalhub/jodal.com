@@ -31,3 +31,160 @@ function logout() {
 
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>입찰공고 리스트 - 조달닷컴</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; max-width: 1200px; margin: auto; }
+    h1 { font-size: 26px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    .search-sort { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    input[type="text"] { padding: 8px; width: 300px; }
+    select { padding: 8px; }
+    button {
+      padding: 6px 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #218838; }
+    .modal {
+      display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -20%);
+      background: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      z-index: 1000; width: 400px;
+    }
+    .modal h3 { margin-top: 0; }
+    .modal-close { margin-top: 20px; text-align: right; }
+    .checkmark { color: green; font-size: 18px; margin-left: 4px; }
+  </style>
+</head>
+<body>
+  <h1>📋 입찰공고 리스트</h1>
+
+  <div class="search-sort">
+    <input type="text" id="searchInput" placeholder="공고명, 지역, 공고번호 검색" oninput="renderTable()" />
+    <label>정렬:
+      <select id="sortSelect" onchange="renderTable()">
+        <option value="마감일">마감일 오름차순</option>
+        <option value="지역">지역 가나다순</option>
+      </select>
+    </label>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>입찰사이트</th>
+        <th>지역</th>
+        <th>공고번호</th>
+        <th>공고명</th>
+        <th>기초금액</th>
+        <th>낙찰하한율</th>
+        <th>마감일</th>
+        <th>투찰시간</th>
+        <th>계산</th>
+      </tr>
+    </thead>
+    <tbody id="bidsTableBody"></tbody>
+  </table>
+
+  <!-- 상세 정보 팝업 -->
+  <div class="modal" id="detailModal">
+    <h3 id="modalTitle">공고 상세</h3>
+    <div id="modalContent"></div>
+    <div class="modal-close">
+      <button onclick="closeModal()">닫기</button>
+    </div>
+  </div>
+
+  <script>
+    let bidData = [];
+
+    fetch('bids.json')
+      .then(res => res.json())
+      .then(data => {
+        bidData = data;
+        renderTable();
+      });
+
+    function renderTable() {
+      const tbody = document.getElementById('bidsTableBody');
+      const search = document.getElementById('searchInput').value.trim().toLowerCase();
+      const sort = document.getElementById('sortSelect').value;
+      const submittedTitles = JSON.parse(localStorage.getItem("submittedTitles") || "[]");
+
+      let filtered = bidData.filter(bid =>
+        bid.공고명.toLowerCase().includes(search) ||
+        bid.지역.toLowerCase().includes(search) ||
+        bid.공고번호.includes(search)
+      );
+
+      // 정렬
+      if (sort === "마감일") {
+        filtered.sort((a, b) => new Date(a.마감일) - new Date(b.마감일));
+      } else if (sort === "지역") {
+        filtered.sort((a, b) => a.지역.localeCompare(b.지역, 'ko'));
+      }
+
+      tbody.innerHTML = '';
+      filtered.forEach(bid => {
+        const isSubmitted = submittedTitles.includes(bid.공고명);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${bid.입찰사이트}</td>
+          <td>${bid.지역}</td>
+          <td>${bid.공고번호}</td>
+          <td><a href="#" onclick="showDetail('${bid.공고명}', \`${JSON.stringify(bid).replace(/"/g, '&quot;')}\`)">${bid.공고명}</a></td>
+          <td>${Number(bid.기초금액).toLocaleString()} 원</td>
+          <td>${bid.낙찰하한율}%</td>
+          <td>${bid.마감일}</td>
+          <td>${bid.투찰시간}</td>
+          <td>
+            <button onclick="goToCalculator(${bid.기초금액}, ${bid.낙찰하한율}, '${bid.공고명.replace(/'/g, "\\'")}', '${bid.예비가격범위}')">
+              계산
+            </button>
+            ${isSubmitted ? '<span class="checkmark">✔</span>' : ''}
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function goToCalculator(baseAmount, rate, title, range) {
+      sessionStorage.setItem('baseAmount', baseAmount);
+      sessionStorage.setItem('rate', rate);
+      sessionStorage.setItem('title', title);
+      sessionStorage.setItem('range', range);
+      window.location.href = 'calculator.html';
+    }
+
+    function showDetail(title, dataJson) {
+      const bid = JSON.parse(dataJson.replace(/&quot;/g, '"'));
+      const modal = document.getElementById('detailModal');
+      const content = document.getElementById('modalContent');
+      document.getElementById('modalTitle').innerText = title;
+      content.innerHTML = `
+        <p><strong>공고번호:</strong> ${bid.공고번호}</p>
+        <p><strong>입찰사이트:</strong> ${bid.입찰사이트}</p>
+        <p><strong>지역:</strong> ${bid.지역}</p>
+        <p><strong>기초금액:</strong> ${Number(bid.기초금액).toLocaleString()} 원</p>
+        <p><strong>낙찰하한율:</strong> ${bid.낙찰하한율}%</p>
+        <p><strong>예비가격 범위:</strong> ${bid.예비가격범위}</p>
+        <p><strong>마감일:</strong> ${bid.마감일} ${bid.투찰시간}</p>
+      `;
+      modal.style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
