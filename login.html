@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>로그인 - 조달닷컴</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; max-width: 400px; margin: auto; }
+    h1 { text-align: center; }
+    label { display: block; margin-top: 15px; margin-bottom: 5px; }
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 10px; font-size: 16px;
+    }
+    button {
+      padding: 10px 20px; font-size: 16px; margin-top: 20px; width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔐 조달닷컴 로그인</h1>
+
+  <label for="username">아이디</label>
+  <input type="text" id="username" placeholder="아이디 입력" />
+
+  <label for="password">비밀번호</label>
+  <input type="password" id="password" placeholder="비밀번호 입력" />
+
+  <button onclick="login()">로그인</button>
+
+  <script>
+    function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!username || !password) {
+        alert("아이디와 비밀번호를 모두 입력해주세요.");
+        return;
+      }
+
+      // 관리자 승인된 사용자 확인
+      const approvedUsers = JSON.parse(localStorage.getItem("approvedUsers") || "[]");
+      const found = approvedUsers.find(user => user.username === username && user.password === password);
+
+      if (found) {
+        localStorage.setItem("loggedInUser", username);
+        alert("로그인 성공!");
+        window.location.href = "bids.html";
+      } else {
+        alert("승인되지 않았거나 정보가 일치하지 않습니다.");
+      }
+    }
+  </script>
+</body>
+</html>

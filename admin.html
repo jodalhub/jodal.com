@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>관리자 승인 페이지 - 조달닷컴</title>
+  <style>
+    body { font-family: sans-serif; padding: 30px; max-width: 1000px; margin: auto; }
+    h1 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    button { padding: 6px 12px; }
+  </style>
+</head>
+<body>
+  <h1>🛠 관리자 승인 페이지</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>대표자명</th>
+        <th>연락처</th>
+        <th>아이디</th>
+        <th>이메일</th>
+        <th>상호명</th>
+        <th>주요 공급 품목</th>
+        <th>승인</th>
+      </tr>
+    </thead>
+    <tbody id="userTableBody">
+      <!-- 등록된 사용자 리스트가 표시될 영역 -->
+    </tbody>
+  </table>
+
+  <script>
+    function loadUsers() {
+      const pending = JSON.parse(localStorage.getItem("pendingUsers") || "[]");
+      const approved = JSON.parse(localStorage.getItem("approvedUsers") || "[]");
+      const tbody = document.getElementById("userTableBody");
+      tbody.innerHTML = "";
+
+      pending.forEach((user, index) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${user.name}</td>
+          <td>${user.phone}</td>
+          <td>${user.username}</td>
+          <td>${user.email}</td>
+          <td>${user.company}</td>
+          <td>${user.category}</td>
+          <td><button onclick="approveUser(${index})">승인</button></td>
+        `;
+
+        tbody.appendChild(row);
+      });
+    }
+
+    function approveUser(index) {
+      const pending = JSON.parse(localStorage.getItem("pendingUsers") || "[]");
+      const approved = JSON.parse(localStorage.getItem("approvedUsers") || "[]");
+      const user = pending.splice(index, 1)[0];
+      approved.push(user);
+
+      localStorage.setItem("pendingUsers", JSON.stringify(pending));
+      localStorage.setItem("approvedUsers", JSON.stringify(approved));
+
+      alert("사용자가 승인되었습니다.");
+      loadUsers();
+    }
+
+    // 최초 로드 시 사용자 목록 표시
+    loadUsers();
+  </script>
+</body>
+</html>

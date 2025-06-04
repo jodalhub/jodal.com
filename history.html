@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>📑 투찰 기록 보기 - 조달닷컴</title>
+  <script src="auth.js"></script>
+  
+<style>
+  body { font-family: sans-serif; padding: 30px; max-width: 1000px; margin: auto; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; }
+  button { padding: 8px 12px; font-size: 14px; cursor: pointer; }
+</style>
+
+</head>
+<body>
+  <div class="topbar">
+    <h1>📑 투찰 기록 보기</h1>
+    <button onclick="logout()">로그아웃</button>
+  </div>
+  <p>📑 투찰 기록 보기 본문 내용이 여기에 표시됩니다.</p>
+  
+<script>
+function logout() {
+  localStorage.removeItem("loggedInUser");
+  alert("로그아웃되었습니다.");
+  setTimeout(() => {
+    window.location.href = "login.html";
+  }, 500);
+}
+</script>
+
+</body>
+</html>

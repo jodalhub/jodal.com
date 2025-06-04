@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입 - 조달닷컴</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 30px; }
+    h2 { margin-bottom: 20px; }
+    label { display: block; margin-top: 12px; }
+    input, textarea { width: 100%; padding: 10px; margin-top: 5px; font-size: 14px; }
+    .submit-btn { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h2>조달닷컴 회원가입</h2>
+  <form id="signupForm">
+    <label>대표자명</label>
+    <input type="text" name="ceo" required>
+
+    <label>연락처 (휴대폰)</label>
+    <input type="tel" name="phone" required>
+
+    <label>아이디</label>
+    <input type="text" name="username" required>
+
+    <label>비밀번호</label>
+    <input type="password" name="password" required>
+
+    <label>생년월일</label>
+    <input type="date" name="dob" required>
+
+    <label>이메일 주소</label>
+    <input type="email" name="email" required>
+
+    <label>상호명</label>
+    <input type="text" name="company" required>
+
+    <label>사업자등록번호</label>
+    <input type="text" name="bizNo" required>
+
+    <label>사업장 소재지</label>
+    <input type="text" name="address" required>
+
+    <label>주요 공급 품목</label>
+    <input type="text" name="category" placeholder="예: 의료기기, 건축자재 등" required>
+
+    <!-- 체크박스 오른쪽 정렬 -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 20px;">
+      <span style="font-size: 14px;">[필수] 개인정보 수집 및 이용에 동의합니다.</span>
+      <input type="checkbox" name="agree" id="agree" required style="width: 18px; height: 18px;">
+    </div>
+
+    <p style="font-size: 13px; color: #666; line-height: 1.5em; margin-top: 8px;">
+      귀하께서 제공하신 정보는 회원가입, 본인확인, 입찰 정보 제공 및 서비스 이용을 위한 목적으로 수집·이용됩니다. <br>
+      수집 항목: 아이디, 비밀번호, 이메일, 대표자명, 연락처, 생년월일, 상호명, 사업자등록번호, 소재지, 주요 공급 품목 등<br>
+      보유 기간: 회원 탈퇴 시까지 또는 관련 법령에 따라 보관될 수 있습니다.
+    </p>
+
+    <button type="submit" class="submit-btn">회원가입</button>
+  </form>
+
+  <script>
+    document.getElementById("signupForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const user = Object.fromEntries(formData.entries());
+      user.isApproved = false;
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      users.push(user);
+      localStorage.setItem("users", JSON.stringify(users));
+
+      alert("회원가입이 완료되었습니다. 관리자의 승인을 기다려주세요.");
+      window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>
