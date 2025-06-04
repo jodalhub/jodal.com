@@ -1,17 +1,107 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <meta charset="UTF-8" />
-  <title>아이디/비밀번호 찾기</title>
+  <title>아이디/비밀번호 찾기 - 조달닷컴</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body { text-align: center; padding: 100px; font-family: sans-serif; }
-    input { display: block; margin: 10px auto; padding: 10px; width: 250px; }
-    .btn { padding: 10px 20px; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: #f0f4f8; padding: 30px; max-width: 600px; margin: auto; }
+    h2 { text-align: center; color: #0056b3; }
+    .tab { display: flex; justify-content: center; margin-bottom: 20px; }
+    .tab button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: none;
+      background: #e0e0e0;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .tab button.active {
+      background: #0056b3;
+      color: white;
+    }
+    form { display: none; background: white; padding: 20px; border-radius: 8px; }
+    form.active { display: block; }
+    label { display: block; margin-top: 12px; }
+    input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    .result { margin-top: 15px; color: green; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>🔍 아이디/비밀번호 찾기</h1>
-  <input type="email" placeholder="가입한 이메일" />
-  <button class="btn">확인</button>
+  <h2>아이디 / 비밀번호 찾기</h2>
+  <div class="tab">
+    <button id="idTab" class="active" onclick="showForm('id')">아이디 찾기</button>
+    <button id="pwTab" onclick="showForm('pw')">비밀번호 찾기</button>
+  </div>
+
+  <form id="idForm" class="active">
+    <label>대표자명</label>
+    <input type="text" id="id_ceo" required>
+
+    <label>휴대폰 번호</label>
+    <input type="tel" id="id_phone" required>
+
+    <button type="button" onclick="findId()">아이디 찾기</button>
+    <div class="result" id="idResult"></div>
+  </form>
+
+  <form id="pwForm">
+    <label>아이디(이메일)</label>
+    <input type="email" id="pw_email" required>
+
+    <label>생년월일</label>
+    <input type="date" id="pw_dob" required>
+
+    <button type="button" onclick="findPassword()">비밀번호 찾기</button>
+    <div class="result" id="pwResult"></div>
+  </form>
+
+  <script>
+    function showForm(type) {
+      document.getElementById("idForm").classList.remove("active");
+      document.getElementById("pwForm").classList.remove("active");
+      document.getElementById("idTab").classList.remove("active");
+      document.getElementById("pwTab").classList.remove("active");
+
+      if (type === "id") {
+        document.getElementById("idForm").classList.add("active");
+        document.getElementById("idTab").classList.add("active");
+      } else {
+        document.getElementById("pwForm").classList.add("active");
+        document.getElementById("pwTab").classList.add("active");
+      }
+    }
+
+    function findId() {
+      const ceo = document.getElementById("id_ceo").value;
+      const phone = document.getElementById("id_phone").value;
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+      const user = users.find(u => u.ceo === ceo && u.phone === phone);
+      const result = document.getElementById("idResult");
+
+      if (user) {
+        result.textContent = "등록된 아이디(이메일): " + user.username;
+      } else {
+        result.textContent = "일치하는 정보가 없습니다.";
+      }
+    }
+
+    function findPassword() {
+      const email = document.getElementById("pw_email").value;
+      const dob = document.getElementById("pw_dob").value;
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+      const user = users.find(u => u.username === email && u.dob === dob);
+      const result = document.getElementById("pwResult");
+
+      if (user) {
+        result.textContent = "비밀번호 힌트: " + "*".repeat(user.password.length - 2) + user.password.slice(-2);
+      } else {
+        result.textContent = "일치하는 정보가 없습니다.";
+      }
+    }
+  </script>
 </body>
+</html>
