@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>관리자 로그인</title>
+  <script>
+    function login() {
+      const id = document.getElementById("id").value;
+      const pw = document.getElementById("pw").value;
+      if (id === "admin" && pw === "1234") {
+        localStorage.setItem("adminLogin", "ok");
+        window.location.href = "index.html";
+      } else {
+        alert("아이디 또는 비밀번호가 틀렸습니다.");
+      }
+    }
+  </script>
+</head>
+<body>
+  <h2>관리자 로그인</h2>
+  <input type="text" id="id" placeholder="ID"><br>
+  <input type="password" id="pw" placeholder="Password"><br>
+  <button onclick="login()">로그인</button>
+</body>
+</html>
