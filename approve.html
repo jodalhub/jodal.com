@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>회원 승인</title>
+  <script>
+    if (localStorage.getItem("adminLogin") !== "ok") {
+      alert("로그인이 필요합니다.");
+      window.location.href = "login.html";
+    }
+  </script>
+</head>
+<body>
+  <h1>회원 가입 승인 페이지</h1>
+  <p>여기에서 회원 정보를 불러와 승인 또는 삭제할 수 있습니다.</p>
+  <!-- 예시 -->
+  <div>
+    <p>회원: example@domain.com</p>
+    <button>승인</button>
+    <button>삭제</button>
+  </div>
+</body>
+</html>
